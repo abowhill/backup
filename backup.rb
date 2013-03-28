@@ -59,7 +59,7 @@ class Configuration
 
        when /^\s*\[\s*(.+)\s*\]\s*$/
          cleaned = clean($1)
-         if FileTest.directory?(cleaned)
+         if current_section.name == "exclusions" ||  FileTest.directory?(cleaned)
             current_section.add(BackableDir.new(cleaned))
          end
 
