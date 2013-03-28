@@ -36,24 +36,38 @@ class Configuration
      @current_section = section
    end
 
+   def clean(str)
+      ret_str = str;
+      ret_str.chomp!
+      ret_str.lstrip!
+      return ret_str
+   end
+
    def read()
      File.open(file,"r").each_line do |line| 
      line.chomp!
 
      case line
-       when /^(\s*\[){2}\s*(.+)(\s*\]){2}\s*$/
-         add(Section.new($2.chomp))
-
-       when /^\s*\[\s*(.+)\s*\]\s*$/
-         current_section.add(BackableDir.new($1.chomp))
 
        when /^\s*(#+).*$/
 
+       when /^(\s*\[){2}\s*(.+)(\s*\]){2}\s*$/
+         cleaned = clean($2)
+         if (cleaned == "roots" || cleaned == "backups" || cleaned == "exclusions")
+            add(Section.new(cleaned))
+         end
+
+       when /^\s*\[\s*(.+)\s*\]\s*$/
+         cleaned = clean($1)
+         if FileTest.directory?(cleaned)
+            current_section.add(BackableDir.new(cleaned))
+         end
+
        when /\s*(.+)\s*/
-         current_section.current_directory.add(BackableFile.new($1.chomp))
+         current_section.current_directory.add(BackableFile.new(clean($1)))
 
        else
-       
+         #
       end
    end
 end
