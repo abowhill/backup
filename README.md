@@ -1,30 +1,28 @@
 What is this?
 =============
 
-This is a Ruby script that helps simplify the process of making selective backups on UNIX-like systems. A selective backup is one in which files and directories are selected according to the user's personal criteria of what is worth preserving and archiving. Selective backups are a fraction of the size of a full system dump, and are intended to preserve customized work.
+This is a `Ruby` script that helps simplify the process of making selective backups on `UNIX-like` systems. A selective backup is one in which files and directories are selected according to the user's personal criteria of what is worth preserving and archiving. Selective backups are a fraction of the size of a full system dump, and are intended to preserve customized work.
 
 Features
 --------
 
-* _Decoupled._ This script only prints pathnames to STDOUT. This data can be piped to any utility, for any purpose, but the script was made with archving and pax in mind.
+* _Decoupled._ This script only prints pathnames to `STDOUT`. This data can be piped to any utility, for any purpose, but the script was made with archving and `pax` in mind.
 
 * The ability to specify a list of files or whole directories to scan for pathnames. This is called the __backup specification__.
 
-* The ability to apply a single backup specification to multiple roots, such as those found on a system hosting FreeBSD jails. This is called the __root list__.
+* The ability to apply a single backup specification to multiple roots, such as those found on a system hosting `FreeBSD` jails. This is called the __root list__.
 
 * A global exclusion list which can be set to ignore specified directories relative to the given roots. Roots themselves are automatically added to this list. This is called the __exclusion list__.
 
 
 Input and Output
 ----------------
-On input, this script reads sections and directives in a configuration file created by the user. The full path to this file is the only command-line parameter. Based on the contents of the configuration file, a list of full pathnames is sent to STDOUT suitable for piping to an archive utility such as `pax`.
+On input, this script reads sections and directives in a configuration file created by the user. The full path to this file is the only command-line parameter. Based on the contents of the configuration file, a list of full pathnames is sent to `STDOUT` suitable for piping to an archive utility such as `pax`.
 
 Description
 ------------
 
-All user-supplied data is provided in the configuration file. The file can have any name, and can reside anywhere on the system. 
-
-Internally, the confugration file is laid out somewhat similarly to an `.ini` file but with some required fields and syntax.
+All user-supplied data is provided in the configuration file. The file can have any name, and can reside anywhere on the system. Internally, the confugration file is laid out somewhat similarly to an `.ini` file but with some required fields and syntax.
 
 The configuration file has five types of entries: `[[section]]`, `[/directory]`, `file`, `#comment` and `blank`. All entries are kept one-per-line. `Blank` lines and `#comment` lines are ignored, and may appear freely between other entries.
 
@@ -33,7 +31,7 @@ The configuration file has five types of entries: `[[section]]`, `[/directory]`,
 
 There are three required `[[section]]` entries containing fixed keywords. Section entries are enclosed in double-brackets `[[ ]]` with a keyword in the middle.
 
-Example A. (this configuration will do nothing)
+_Example A._ (this configuration will do nothing)
 
 	[[roots]]
 
@@ -47,7 +45,7 @@ Example A. (this configuration will do nothing)
 
 Define two roots to apply the backup specification: the host (`/`) and a jail (`/usr/jails/192.1680.99`). Does nothing when run.
 
-Example B:
+_Example B:_
 
 	[[roots]
 	[/]
@@ -61,7 +59,7 @@ Example B:
 
 `[[backups]]` marks the start of the backup specification. This must contain one or more file and/or `[/directory]` entries.
 
-Example C.
+_Example C._
 
 Define a single file in the specification: `/etc/rc.conf`, and apply it to two roots from Example B. above. Full pathnames to this file under each root will be displayed on output if they exist:
 
@@ -83,7 +81,7 @@ Which produces on stdout:
 
 Note that directories always appear enclosed in single-brackets, and filenames have no enclosure. To define more files to be scanned under `/etc`, we can simply add their names under the `[/etc]` list:
 
-Example D.
+_Example D._
 
 	[[roots]]
 	[/]
@@ -116,6 +114,8 @@ Which produces on stdout:
 If you want to scan an entire directory for a list of files thereunder, just specify the `[/directory]` without any list of files. If the script sees this type of entry, it will scan blindly for everything under the directory. 
 
 For example, suppose we want to add all the files under `/etc/ssl`, which at the moment are only two, but could grow over time:
+
+_Example E._
 
 	[[roots]]
 	[/]
@@ -164,6 +164,8 @@ Additionally, all directories listed in the `root specification` will also be sk
 
 For example, suppose I want to backup everything under `/root`, but want to ignore an large subdirectory of unwanted files called `/root/sources-123-extracted` :
 
+_Example F._
+
 	[/]
 	[/usr/jails/192.168.0.99]
 
@@ -189,7 +191,6 @@ For example, suppose I want to backup everything under `/root`, but want to igno
 	[/root/sources-123-extracted]
 
 This would allow all the dot-files under root to be listed to STDOUT, but would ignore the unwanted directory entirely.
-
 
 
 Archiving with pax
