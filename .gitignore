@@ -1,2 +1,4 @@
-# ignore *.me files
+# ignore list
 *.me
+*.pl
+*.html
