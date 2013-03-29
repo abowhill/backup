@@ -59,9 +59,7 @@ class Configuration
 
        when /^\s*\[\s*(.+)\s*\]\s*$/
          cleaned = clean($1)
-         if current_section.name == "exclusions" ||  FileTest.directory?(cleaned)
-            current_section.add(BackableDir.new(cleaned))
-         end
+         current_section.add(BackableDir.new(cleaned))
 
        when /\s*(.+)\s*/
          current_section.current_directory.add(BackableFile.new(clean($1)))
@@ -109,18 +107,23 @@ class BackableDir
      @current_file = file_ref
    end
 
+   
+
+
    # based on: http://ruby-doc.org/stdlib-1.9.3/libdoc/find/rdoc/Find.html
 
    def BackableDir.traverse(root,start_path,exclusions)
-     Find.find(root + start_path) do |path|
-        if FileTest.directory?(path)
-           path.slice!(root)
-           if exclusions[path.to_sym] 
-              Find.prune
+     fullpath = root + start_path
+     PathCheck.clean(fullpath)
+     if FileTest.directory?(fullpath) # make sure scan dir exists first
+        Find.find(fullpath) do |path|
+           if FileTest.directory?(path)
+              if exclusions[path.to_sym] # root on exclusion list?
+                 Find.prune
+              end
            end
-        path.prepend(root)
+           PathCheck.display(path)
         end
-     PathCheck.display(path)
      end
    end
 end
