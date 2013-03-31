@@ -1,0 +1,203 @@
+#!/usr/local/bin/perl -w
+
+#
+# Purpose
+# -------
+#
+# The primary purpose of testing this script will be to ensure basic operating FUNCTIONALITY 
+# of the programs intended purpose: to produce full paths to extant files and directories according to 
+# specfications held in a configuration file.
+#
+# A secondary purpose will be to inform the developer on possible features to add, or refinements
+# to be made to the design.
+#
+#
+# Process
+# -------
+# 
+# The environment will be FreeBSD. Tests will be run with a copy of the TEST_HARNESS and PROGRAM_TO_TEST.
+# in a subdirectory representing the root of a file system. Perl and Ruby interpreters will remain in-place on the 
+# the larger system, but outside the immediate testing environment.
+#
+# For each test this test utility will generally:
+#
+# 1. TEST_HARNESS writes out a CONFIGURATION file
+# 2. TEST_HARNESS writes out and populates a TEST_FILESYSTEM directory tree for the PROGRAM_TO_TEST to scan for files
+# 3. Run the PROGRAM_TO_TEST from the TEST_HARNESS with ARGUMENTS
+# 4. Validate against STDERR and SDTOUT
+# 5. Place the validation TEST_RESULT into a report file.
+#
+#
+# Approach
+# --------
+#  
+# Black Box, using a Perl script to do the testing, called the TEST_HARNESS against a Ruby script and 
+# associated components which are defined as a whole, to be the PROGRAM_TO_TEST.
+#
+# Named tests will be performed on the following COMPONENTS of the PROGRAM_TO_TEST:
+#
+# 1. FILE           tests on configuration and script files, ignoring content
+# 2. ARGUMENT       tests on arguments passed to the script from the command line
+# 3. CONFIGURATION  tests on data entities in the configuration file
+# 4. OUTPUT         tests on the output of the program, both STDOUT and STDERR
+#
+# Properties to test will be variations on:
+#
+# 1. Content
+# 2. Presence
+# 3. Position
+# 4. Order
+# 5. Duplicity
+#
+# FILE tests
+# ----------
+# Content         zero-length CONFIG, symbolic link, hard link, device node
+# Presence        absence of named CONFIG, read permissions too high on CONFIG or SCRIPT
+# Position        run SCRIPT from varied locations other than current directory
+# Order           n/a
+# Duplicity       two symlinks to SCRIPT and two symlinks to CONFIG. Run off symlinks.
+#                 two scripts running at same time
+#
+# ARGUMENT tests
+# --------------
+# Content         spaces on either side, enclosures "", '',  ./ and .../dir prefix, invalid config file
+# Presence        missing/present CONFIG argument
+# Position        pass CONFIG from various locations other than current directory
+# Order           n/a
+# Duplicity       duplicate arguments
+# 
+# CONFIGURATION tests
+# -------------------
+# 
+# To be conducted on each of the physcial data types found in the configuration file:
+#
+# 1. blanks
+# 2. #comments
+# 3. [[sections]]
+# 4. [directories]
+# 5. filenames
+#
+# Content               
+#        blanks          cr-lf, cr, lf, and extra whitespace should all be skipped
+#        #comments       # hash, #hash + comments, multiple hashes should be skipped
+#        [[sections]]    whitespace between brackets and tagnames ignored, UC/LC tagnames
+#        [directories]   trailing slash ignored? 
+#                        leading slash present?
+#                        whitespace, backslash, wildcards, quotes between brackets and dirnames ignored?
+#        filenames       embedded slashes, whitespace, wildcards, quotes ignored?
+# Presence
+#        blanks          no blanks, some blanks, blanks not seperating entries
+#        #comments       no comments, some comments
+#        [[sections]]    missing section names
+#        [directories]   no directories, missing directory from filename list
+#        filenames       no filenames, filenames in all sections?
+# Position
+#        blanks          blanks at beginning, end between everything
+#        #comments       comments at beginning, end and between everything, end of line, appended to other entries
+#        [[sections]]    beginning , middle, end of line
+#        [directories]   beginning, middle, end of line
+#        filenames       beginning, middle, end of line
+# Order
+#        blanks          n/a
+#        #comments       before and after [directory], [[section]], file
+#        [[sections]]    sections out of order
+#        [directories]   directories before file lists?
+#        filenames       files in [[roots]] or [[exclusions]] sections?
+# Duplicity
+#        blanks          zero, one, many consecutive
+#        #comments       zero, one, many consecutive
+#        [[sections]]    zero, one, duplicates
+#        [directories]   zero per section, one per section, duplicates in different sections
+#                        duplicates in same section?
+#        filenames       duplicates in same section?
+#
+# 
+# OUTPUT Tests
+# ------------
+# There are currently three types of output the program produces:
+#
+# 1. STDOUT_USER         Text generated by SCRIPT to inform or interact with user. 
+# 2. STDERR_DUMP         Ruby stack dump when program encounters unchecked internal error
+# 3. STDOUT_DATA         output data expected by the user to pipe to another utility
+#
+# These types are currently not represented as objects. This may change in the future. Currently,
+# STDOUT_USER and SDTOUT_DATA are distingushible only because they appear under mutually exclusive
+# conditions: (argument help text vs. normal program output)
+#
+# This does make each OUTPUT type testable, but fragile if the SCRIPT design changes to include 
+# caught internal exceptions, runtime error codes to inform the user about configuration validation
+# errors, interactive user input, distinguishing OS errors from internal program logic errors, 
+# or re-assignment of file descriptors to each OUTPUT type.
+#
+# Here is a list of the current forms of OUTPUT as they map to the three types listed above:
+#
+# 1. STDOUT_USER    Limited to USAGE_HELP text issued by SCRIPT when incorrect arguments are processed.
+# 2. STDERR_DUMP    RUBY_ERROR triggered by libraries or SCRIPT code. OS_ERROR triggered by OS_KERNEL.
+# 3. STDOUT_DATA    output data expected by user to pipe to another utility.
+#
+# Until a design change is made to SCRIPT, these tests will treat RUBY_ERROR and OS_ERROR as the same thing,
+# and won't attempt to distinguish between the two sources during testing.
+#
+# Tests on PHYSICAL_OUTPUT
+#
+#
+#
+# STDOUT_USER tests
+# -----------------
+# Content         
+# Presence        
+# Position        
+# Order           
+# Duplicity       
+#
+#
+#
+# STDERR_DUMP tests
+# ------------------
+# Content         
+# Presence        
+# Position        
+# Order           
+# Duplicity       
+#
+#
+# STDOUT_DATA tests
+# -----------------
+# Content         
+# Presence        
+# Position        
+# Order           
+# Duplicity       
+# Abstract Types to test:
+# ----------------------
+#
+# Some physical entities have multiple representations in the context in which they occur.
+# These are divided into abstract types, which can be tested.
+#
+# 1. ROOT [directories] absolute locations and fixed, which appear in [[roots]]
+# 2. EXCLUSION [directories] absolute locations and fixed, which appear in [[exclusions]]
+# 3. SCANNED [directories] relative to root, which are blind-scanned, and are standalone entries, under [[backups]]
+# 4. LIST_PREFIX [directories] relative to root, refer to lists of files and do not get scanned. In [[backups]]
+#
+# Business Rules
+# ==============
+#
+# These are rules that describe what the program will accept and not accept.
+# The should probably have supporting error messages as long as they inform the user about something 
+# he or she can do something about to fix. Error messages relating to bad programming are not included.
+#
+#
+# Configuration file
+# ------------------
+# ROOT directories must exist on the system at an absolute location and be traversable.
+# EXCLUSION directories must exist on the system at absolute locations.
+# ROOT and EXCLUSION directories are combined into EXCLUSIONs
+# ROOT and EXCLUSION directories are never scanned
+# LIST_PREFIX directories are never scanned 
+# SCANNED directories optionally exist at the listed ROOTS and are always scanned if found under any ROOT
+# LIST_PREFIX directories are always followed by one or more files. 
+# SCANNED directories are never followed by a file list.
+# LIST_PREFIX directories are checked for files by the following pattern: ROOT/LIST_PREFIX/file
+# LIST_PREFIX directories only appear in BACKUPS section
+# SCANNED directories only appear in BACKUPS section
+#
