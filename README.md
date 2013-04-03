@@ -12,7 +12,7 @@ Features
 
 * The ability to apply a single backup specification to multiple roots, such as those found on a system hosting `FreeBSD` jails. This is called the __root list__.
 
-* A global exclusion list which can be set to ignore specified directories relative to the given roots. Roots themselves are automatically added to this list. This is called the __exclusion list__.
+* A global exclusion list which can be set to ignore specified directories. Roots themselves are automatically added to this list. This is called the __exclusion list__.
 
 
 Input and Output
@@ -226,16 +226,16 @@ This script has only been lightly tested, and is still under development. I've t
 Further Development
 -------------------
 
-I encounter new bugs every time I change the configuration file of this script, so by no means is it ready for production. In making this process easier and more informative, I plan to test the script. This means, build a test harness and test suites. This will probably be written in a different language to avoid a number of pitfalls of which I have an analogy:
+I encounter new bugs every time I change the configuration file of this script, so by no means is it ready for production. In making this process easier and more informative, I plan to test the script. This means, build a test harness and test suites. This will probably be written in a different language to avoid a number of pitfalls:
 
-1. Test code tending to drift over time towards over-agreement with the functionality of objects to test. AKA: If you're going to throw trash into your neighbor's yard, make sure you don't throw valuable things over the fence that he wants to keep.
-2. Test code filling in for what should rightfully be functionality and design of the program. AKA: Don't inadvertently throw away your neighbor's trash into receptacles for him, by picking-up stuff he threw at you.
-3. Test code reflecting the same unseen errors and flaws with the source code because they are written in the same language and using the same flawed libraries. AKA: know where the property line is, and make sure the trash goes over the fence and not into your own yard too.
+1. Test code tending to drift over time towards over-agreement with the functionality of objects to test. 
+2. Test code filling in for what should rightfully be functionality and design of the program. 
+3. Test code reflecting the same unseen errors and flaws with the source code because they are written in the same language and using the same flawed libraries.
 
 So, in order to test, the program must be testable. It is not in its current condition. I would consider a program like this to be testable when the object model has been fully hashed-out, which it is not. 
 
 For example, of the 5 physical data types found in the config file (`blanks`, `filenames`, `#comments`, `[/directory]`, `[[section]]`) only 3 of these are represented by classes (`blanks` and `#comments` have no specific representation, even as singletons). 
 
-One physical (system) data type in particular - </directory> , has 4 different meanings and behaviors depending on where it shows up in the configuration file. These semantics need to be represented by a set of `conceptual classes` which all behave differently but share a directory-likeness. At least some of the system data types have to be mapped to conceptual data types in order to easily distinguish their behavior from one another. Until that happens, it's an incomplete design and `shouldn't` be tested.
+One physical (system) data type in particular - `</directory>` , has 4 different meanings and behaviors depending on where it shows up in the configuration file. These semantics need to be represented by a set of `conceptual classes` which all behave differently but share a directory-likeness. At least some of the system data types have to be mapped to conceptual data types in order to easily distinguish their behavior from one another. Until that happens, it's an incomplete design and `shouldn't` be tested.
 
 Once the design is completed, and all important objects are available to be tested, perhaps some attention should be paid to building a crude API and driver. At that point a test harness can grasp the object model firmly enough to test different configuration file scenarios against different directory structures. 
