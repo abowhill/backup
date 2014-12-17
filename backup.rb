@@ -44,32 +44,29 @@ class Configuration
    end
 
    def read()
-     File.open(file,"r").each_line do |line| 
-     line.chomp!
+      File.open(file,"r").each_line do |line| 
+         line.chomp!
 
-     case line
+         case line
+            when /^\s*(#+).*$/
 
-       when /^\s*(#+).*$/
+            when /^(\s*\[){2}\s*(.+)(\s*\]){2}\s*$/
+               cleaned = clean($2)
+               if (cleaned == "roots" || cleaned == "backups" || cleaned == "exclusions")
+                  add(Section.new(cleaned))
+               end
 
-       when /^(\s*\[){2}\s*(.+)(\s*\]){2}\s*$/
-         cleaned = clean($2)
-         if (cleaned == "roots" || cleaned == "backups" || cleaned == "exclusions")
-            add(Section.new(cleaned))
+            when /^\s*\[\s*(.+)\s*\]\s*$/
+               cleaned = clean($1)
+               current_section.add(BackableDir.new(cleaned))
+
+            when /\s*(.+)\s*/
+               current_section.current_directory.add(BackableFile.new(clean($1)))
          end
-
-       when /^\s*\[\s*(.+)\s*\]\s*$/
-         cleaned = clean($1)
-         current_section.add(BackableDir.new(cleaned))
-
-       when /\s*(.+)\s*/
-         current_section.current_directory.add(BackableFile.new(clean($1)))
-
-       else
-         #
       end
    end
-end
 
+end
 
 # Section represents a [[section]] entry in the configuration file.
 # Contains a hash of one or more [/directories]
@@ -176,4 +173,4 @@ end
          end
       end
    end
-end
+
